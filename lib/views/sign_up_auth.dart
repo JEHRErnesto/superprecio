@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superprecio/user_auth/firebase_auth_services.dart';
@@ -118,15 +119,33 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _signUp() async {
-    String username = _usernameController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
-    if (user != null) {
+  String username = _usernameController.text;
+  String email = _emailController.text;
+  String password = _passwordController.text;
+
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    if (userCredential.user != null) {
+      String userId = userCredential.user!.uid; // Acceso seguro ya que sabemos que user no es nulo
+
+      // Guarda el nombre de usuario en Firestore
+      await FirebaseFirestore.instance.collection('usuario').doc(userId).set({
+        'username': username,
+        // Otros campos de usuario que desees almacenar
+      });
+
       print("Usuario agregado satisfactoriamente.");
       Navigator.pushNamed(context, "/login");
     } else {
-      print("Some error happend");
+      print("No se pudo obtener el ID del usuario.");
     }
+  } catch (error) {
+    print("Error al registrar al usuario: $error");
   }
+}
+
 }

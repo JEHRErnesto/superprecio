@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:superprecio/user_auth/firebase_auth_services.dart';
 import 'package:superprecio/views/sign_up_auth.dart';
 import 'package:superprecio/widget/input_widget.dart';
+import 'package:superprecio/views/sign_up_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

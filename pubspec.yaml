@@ -42,6 +42,7 @@ dependencies:
   geolocator: ^10.1.0
   flutter_map_marker_cluster: ^1.3.1
   flutter_launcher_icons: ^0.13.1
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -56,7 +57,7 @@ dev_dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  image_path: "img/icono/Superprecio.jpeg"
+  image_path: "img/icono/Superprecio.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -74,6 +75,11 @@ flutter:
   - img/gasolineras/UNO.png
   - img/gasolineras/puma.png
   - img/pin/pin.png
+  - img/icono/Superprecio.png
+  - img/iconos/mapa.png
+  - img/iconos/cerrar.png
+  - img/iconos/gasolina.png
+  - img/iconos/perfil.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
