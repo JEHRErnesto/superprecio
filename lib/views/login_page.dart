@@ -31,16 +31,21 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue[100],
       appBar: AppBar(
-        //leading: const Icon(Icons.close),
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => print('Has presionado el icono menu'));
-          },
-        ),
-      ),
+  leading: Visibility(
+    visible: false,
+    child: Builder(
+      builder: (BuildContext context) {
+        return IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => print('Has presionado el icono menu'),
+        );
+      },
+    ),
+  ),
+),
+
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -55,14 +60,14 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(
                 height: 30,
               ),
-              _InputCustomized(_emailController, false, 'Correo electronico',
+              _InputCustomized(_emailController, false, 'Correo electrónico',
                   'E-mail', TextInputType.emailAddress, Icons.email),
               const SizedBox(
                 height: 30,
               ),
               InputWidget(
                 controller: _passwordController,
-                hintText: 'Contrasena',
+                hintText: 'Contraseña',
                 isPasswordField: true,
                 //inputType: TextInputType.visiblePassword ,
               ),

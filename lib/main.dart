@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:superprecio/views/Iniciar.dart';
 import 'package:superprecio/views/login_page.dart';
 import 'package:superprecio/views/sign_up_auth.dart';
 import 'package:superprecio/pages/home.dart';
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Material App',
       theme: ThemeData(
-        primarySwatch: Colors.orange,
+        primarySwatch: Colors.blue,
       ),
       initialRoute: "/",
       routes: {
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         "/edit": (context) => const EditStudents(),*/
         "/login": (context) => const LoginPage(),
         "/signup": (context) => const SignUpPage(),
+        "/SplashScreen": (context) =>  SplashScreen(),
       },
     );
   }

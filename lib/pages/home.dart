@@ -15,16 +15,20 @@ class homeState extends State<home> {
       ''; // Agregar una variable para almacenar el nombre de usuario.
 
   @override
-  void initState() {
-    super.initState();
-    // Al iniciar el widget, obtén el nombre de usuario y actualiza el estado.
-    getUserNameFromFirebase(FirebaseAuth.instance.currentUser!.uid)
-        .then((name) {
+  @override
+void initState() {
+  super.initState();
+  // Al iniciar el widget, obtén el nombre de usuario y actualiza el estado.
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    getUserNameFromFirebase(user.uid).then((name) {
       setState(() {
         userName = name;
       });
     });
   }
+}
+
 
   Future<String> getUserNameFromFirebase(String userId) async {
     String userName = "";

@@ -1,7 +1,16 @@
+import 'dart:math';
+import 'package:flutter_google_maps_webservices/directions.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+
+import 'package:flutter_google_maps_webservices/directions.dart' as google_maps;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps_flutter;
+
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
+
 
 class MapPage extends StatefulWidget {
   @override
@@ -9,8 +18,14 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+
   late GoogleMapController _googleMapController;
   Set<Marker> _markers = {};
+  Set<google_maps_flutter.Polyline> _polylines = {};
+  PolylinePoints polylinePoints = PolylinePoints();
+  Position? _currentPosition;
+  final directionsApiClient = GoogleMapsDirections(apiKey: 'AIzaSyAm1WqsytzbfNgMwK11SmJFhxN916pwIgc');
+  
 
   @override
   void initState() {
@@ -19,15 +34,72 @@ class _MapPageState extends State<MapPage> {
     _addMarkers();
   }
 
-  void _getCurrentLocation() async {
-    try {
-      Position position = await determinePosition();
-      LatLng initialPosition = LatLng(position.latitude, position.longitude);
-      _updateCameraPosition(initialPosition);
-    } catch (e) {
-      print('Error obtaining current location: $e');
-    }
+  void _calculateAndDisplayRoute(LatLng destination) async {
+  if (_currentPosition == null) {
+    return;
   }
+
+  PointLatLng origin = PointLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+  PointLatLng destinationPoint = PointLatLng(destination.latitude, destination.longitude);
+
+  DirectionsResponse response = await directionsApiClient.directions(
+    Location(lat: origin.latitude, lng: origin.longitude),
+    Location(lat: destinationPoint.latitude, lng: destinationPoint.longitude),
+
+  );
+
+  if (response.status == 'OK') {
+    List<LatLng> route = [];
+
+    for (var step in response.routes[0].legs[0].steps) {
+      final startLocation = step.startLocation;
+      final endLocation = step.endLocation;
+
+      route.add(LatLng(startLocation.lat, startLocation.lng));
+      route.add(LatLng(endLocation.lat, endLocation.lng));
+    }
+
+    setState(() {
+         _polylines.clear();
+      _polylines.add(google_maps_flutter.Polyline(
+        polylineId: const PolylineId('polyline'),
+        points: route,
+       width: 30,
+        color: Colors.red,
+      ));
+    });
+
+    // Ajusta la cámara para que muestre toda la ruta
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(min(origin.latitude, destinationPoint.latitude), min(origin.longitude, destinationPoint.longitude)),
+      northeast: LatLng(max(origin.latitude, destinationPoint.latitude), max(origin.longitude, destinationPoint.longitude)),
+    );
+    _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+  } else {
+    print('Error al calcular la ruta: ${response.errorMessage}');
+  }
+}
+
+
+
+
+
+
+
+
+
+  void _getCurrentLocation() async {
+  try {
+    _currentPosition = await determinePosition();
+    if (_currentPosition != null) {
+      LatLng initialPosition = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+      _updateCameraPosition(initialPosition);
+    }
+  } catch (e) {
+    print('Error obtaining current location: $e');
+  }
+}
+
 
   Future<Position> determinePosition() async {
     LocationPermission permission;
@@ -62,7 +134,9 @@ class _MapPageState extends State<MapPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Imagen
                     Center(
                       child: Image.asset(
@@ -71,7 +145,9 @@ class _MapPageState extends State<MapPage> {
                         width: 200,
                       ),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Gasolina"
                     Text(
                       'Gasolina',
@@ -81,18 +157,24 @@ class _MapPageState extends State<MapPage> {
                     // Precios de gasolina
                     Text('Regular: \$50'),
                     Text('Super: \$100'),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Diesel"
                     Text(
                       'Diesel: \$50',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Botón "Dar ubicación"
                     ElevatedButton(
                       onPressed: () {
-                        // Agrega aquí la lógica para el botón "Ir"
+                        _calculateAndDisplayRoute(
+                          const LatLng(13.504599, -88.874398), // Cambia esto por la posición del marcador
+                        );
                       },
                       child: Text('Dar ubicación'),
                     ),
@@ -106,7 +188,7 @@ class _MapPageState extends State<MapPage> {
     );
 
     // Agregar un segundo marcador en otra ubicación específica con un título diferente
-    _markers.add(
+   _markers.add(
       Marker(
         markerId: MarkerId('marker_id_2'),
         position: LatLng(13.497174, -88.877471), // Ubicación específica 2
@@ -125,7 +207,7 @@ class _MapPageState extends State<MapPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    
+
                     // Imagen
                     Center(
                       child: Image.asset(
@@ -134,7 +216,7 @@ class _MapPageState extends State<MapPage> {
                         width: 200,
                       ),
                     ),
-                    
+
                     // Título "Gasolina"
                     Text(
                       'Gasolina',
@@ -144,18 +226,24 @@ class _MapPageState extends State<MapPage> {
                     // Precios de gasolina
                     Text('Regular: \$50'),
                     Text('Super: \$100'),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Diesel"
                     Text(
                       'Diesel: \$50',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Botón "Dar ubicación"
                     ElevatedButton(
                       onPressed: () {
-                        // Agrega aquí la lógica para el botón "Ir"
+                        _calculateAndDisplayRoute(
+                          const LatLng(13.497174, -88.877471), // Cambia esto por la posición del marcador
+                        );
                       },
                       child: Text('Dar ubicación'),
                     ),
@@ -186,7 +274,7 @@ class _MapPageState extends State<MapPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    
+
                     // Imagen
                     Center(
                       child: Image.asset(
@@ -195,7 +283,7 @@ class _MapPageState extends State<MapPage> {
                         width: 200,
                       ),
                     ),
-                    
+
                     // Título "Gasolina"
                     Text(
                       'Gasolina',
@@ -205,18 +293,24 @@ class _MapPageState extends State<MapPage> {
                     // Precios de gasolina
                     Text('Regular: \$50'),
                     Text('Super: \$100'),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Diesel"
                     Text(
                       'Diesel: \$50',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Botón "Dar ubicación"
                     ElevatedButton(
                       onPressed: () {
-                        // Agrega aquí la lógica para el botón "Ir"
+                        _calculateAndDisplayRoute(
+                          const LatLng(13.504898, -88.874929), // Cambia esto por la posición del marcador
+                        );
                       },
                       child: Text('Dar ubicación'),
                     ),
@@ -228,10 +322,11 @@ class _MapPageState extends State<MapPage> {
         },
       ),
     );
-    _markers.add(
+    /* _markers.add(
       Marker(
         markerId: MarkerId('marker_id_4'),
-        position: LatLng(13.50382949690554, -88.87122296874753), // Ubicación específica 2
+        position: LatLng(
+            13.50382949690554, -88.87122296874753), // Ubicación específica 2
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showDialog(
@@ -247,7 +342,7 @@ class _MapPageState extends State<MapPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    
+
                     // Imagen
                     Center(
                       child: Image.asset(
@@ -256,7 +351,7 @@ class _MapPageState extends State<MapPage> {
                         width: 200,
                       ),
                     ),
-                    
+
                     // Título "Gasolina"
                     Text(
                       'Gasolina',
@@ -266,14 +361,18 @@ class _MapPageState extends State<MapPage> {
                     // Precios de gasolina
                     Text('Regular: \$50'),
                     Text('Super: \$100'),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Diesel"
                     Text(
                       'Diesel: \$50',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Botón "Dar ubicación"
                     ElevatedButton(
                       onPressed: () {
@@ -292,7 +391,8 @@ class _MapPageState extends State<MapPage> {
     _markers.add(
       Marker(
         markerId: MarkerId('marker_id_5'),
-        position: LatLng(13.489563704054635, -88.85593957054992), // Ubicación específica 2
+        position: LatLng(
+            13.489563704054635, -88.85593957054992), // Ubicación específica 2
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showDialog(
@@ -308,7 +408,7 @@ class _MapPageState extends State<MapPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    
+
                     // Imagen
                     Center(
                       child: Image.asset(
@@ -317,7 +417,7 @@ class _MapPageState extends State<MapPage> {
                         width: 200,
                       ),
                     ),
-                    
+
                     // Título "Gasolina"
                     Text(
                       'Gasolina',
@@ -327,14 +427,18 @@ class _MapPageState extends State<MapPage> {
                     // Precios de gasolina
                     Text('Regular: \$50'),
                     Text('Super: \$100'),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Título "Diesel"
                     Text(
                       'Diesel: \$50',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     // Botón "Dar ubicación"
                     ElevatedButton(
                       onPressed: () {
@@ -349,7 +453,7 @@ class _MapPageState extends State<MapPage> {
           );
         },
       ),
-    );
+    );*/
   }
 
   void _updateCameraPosition(LatLng target) {

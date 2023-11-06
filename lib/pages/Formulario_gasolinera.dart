@@ -20,13 +20,33 @@ class MapWithMarker extends StatefulWidget {
 }
 
 class _MapWithMarkerState extends State<MapWithMarker> {
-
+  
   TextEditingController Regular = TextEditingController();
   TextEditingController Super = TextEditingController();
   TextEditingController Diesel = TextEditingController();
 
   GoogleMapController? _controller;
   File? _image;
+
+  void _mostrarMensaje(BuildContext context, String mensaje) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Mensaje"),
+          content: Text(mensaje),
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,29 +70,34 @@ class _MapWithMarkerState extends State<MapWithMarker> {
                       });
                     },
                     initialCameraPosition: CameraPosition(
-                      target: LatLng(13.508880780413259, -88.87078225041168), // Coordenadas iniciales
+                      target: LatLng(13.508880780413259,
+                          -88.87078225041168), // Coordenadas iniciales
                       zoom: 15,
                     ),
                     markers: {
                       if (_image != null)
                         Marker(
                           markerId: MarkerId('custom'),
-                          position: LatLng(13.508880780413259, -88.87078225041168), // Coordenadas para el marcador
-                          icon: BitmapDescriptor.fromBytes(_image!.readAsBytesSync()),
+                          position: LatLng(13.508880780413259,
+                              -88.87078225041168), // Coordenadas para el marcador
+                          icon: BitmapDescriptor.fromBytes(
+                              _image!.readAsBytesSync()),
                         ),
                     },
                   ),
                 ),
               ),
             ),
-            
+
             // Agregar los campos "Regular", "Super" y "Diesel" debajo del título
             ElevatedButton(
               onPressed: _pickImage,
               child: Text('Seleccionar Imagen'),
             ),
-            SizedBox(height: 20,),
-            
+            SizedBox(
+              height: 20,
+            ),
+
             // Envolver el formulario en un Card
             Card(
               elevation: 10, // Controla la elevación del Card
@@ -81,61 +106,87 @@ class _MapWithMarkerState extends State<MapWithMarker> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Text('Gasolina', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                    SizedBox(height: 10,),
+                    Text(
+                      'Gasolina',
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     TextField(
                       controller: Regular,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset('img/iconos/gasolina.png',
-                          width: 5,
-                          height: 5,),
-                        ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        labelText: 'Regular',
-                        hintText: 'Ingrese el precio de la Regular'
-                      ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              'img/iconos/gasolina.png',
+                              width: 5,
+                              height: 5,
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: 'Regular',
+                          hintText: 'Ingrese el precio de la Regular'),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     TextField(
                       controller: Super,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset('img/iconos/gasolina.png',
-                          width: 5,
-                          height: 5,),
-                        ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        labelText: 'Super',
-                        hintText: 'Ingrese el precio de la Super'
-                      ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              'img/iconos/gasolina.png',
+                              width: 5,
+                              height: 5,
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: 'Super',
+                          hintText: 'Ingrese el precio de la Super'),
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     TextField(
                       controller: Diesel,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset('img/iconos/gasolina.png',
-                          width: 5,
-                          height: 5,),
-                        ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        labelText: 'Diesel',
-                        hintText: 'Ingrese el precio del Diesel'
-                      ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              'img/iconos/gasolina.png',
+                              width: 5,
+                              height: 5,
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          labelText: 'Diesel',
+                          hintText: 'Ingrese el precio del Diesel'),
                     ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Regular.clear();
+                        Super.clear();
+                        Diesel.clear();
+                        _mostrarMensaje(
+                            context, "Gasolinera agregada correctamente");
+                      },
+                      child: Text('Agregar'),
+                    )
                   ],
                 ),
               ),
@@ -147,7 +198,8 @@ class _MapWithMarkerState extends State<MapWithMarker> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
